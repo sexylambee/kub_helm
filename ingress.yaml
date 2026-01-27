@@ -4,7 +4,7 @@ metadata:
   name: myingress
   labels:
     app.kubernetes.io/name: myingress
-
+    nginx.ingress.kubernetes.io/add-base-url: "true"
 spec:
   rules:
   - host: min.test
