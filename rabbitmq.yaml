@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: myrabbitmq1
-        image: rabbitmq:4.2.3
+        image: rabbitmq:4.2.3-management
         resources:
           limits:
             memory: "1Gi"
@@ -36,10 +36,15 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 5672
+        - containerPort: 15672
         env:
         - name: SEED_USERNAME
           value: demo
         - name: SEED_USER_PASSWORD
+          value: demo
+        - name: RABBITMQ_DEFAULT_USER
+          value: demo
+        - name: RABBITMQ_DEFAULT_PASS
           value: demo
         volumeMounts:
         - name: rabbitmq-data
@@ -58,5 +63,9 @@ spec:
   selector:
     app: rabbitmq
   ports:
-  - port: 5672
+  - name: amqp
+    port: 5672
     targetPort: 5672
+  - name: management
+    port: 15672
+    targetPort: 15672
