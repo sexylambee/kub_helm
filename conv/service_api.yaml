@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fs-pvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-part-deployment
+spec:
+  selector:
+    matchLabels:
+      app: api-part
+  template:
+    metadata:
+      labels:
+        app: api-part
+    spec:
+      containers:
+      - name: conv-api
+        image: antonlarichev/conv-api:1.0
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+        env:
+        - name: AMQP_EXCHANGE
+          value: demo
+        - name: AMQP_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_USER
+        - name: AMQP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_PASS
+        - name: AMQP_HOSTNAME
+          value: rabbitmq
+        volumeMounts:
+        - name: fs-volume
+          mountPath: /opt/app/uploads
+          subPath: images
+      volumes:
+      - name: fs-volume
+        persistentVolumeClaim:
+          claimName: fs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-part-service
+spec:
+  type: ClusterIP
+  selector:
+    app: api-part
+  ports:  
+  - protocol: TCP
+    port: 3000 # by default port = targetPort
