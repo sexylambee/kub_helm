@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: myingress
   annotations:
-    nginx.ingress.kubernetes.io/add-base-url: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   rules:
@@ -16,6 +16,13 @@ spec:
         path: "/"
         backend:
           service:
-            name: cluster-service
+            name: app-part-service
             port: 
               number: 80
+      - pathType: Prefix
+        path: "/api"
+        backend:
+          service:
+            name: api-part-service
+            port: 
+              number: 3000
